@@ -1,0 +1,234 @@
+﻿@page "/"
+
+@attribute [StreamRendering]
+@inject NavigationManager nm
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Weather</PageTitle>
+<style>
+    body {
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .username {
+        font-weight: 700;
+        font-size: 10px
+    }
+
+    .pro .send-message .username {
+        color: rgb(54, 247, 16);
+        margin-bottom: 5px;
+    }
+
+    .send-message {
+        background-color: blue;
+        border-radius: 30px 30px 0px 30px;
+        padding: 10px;
+        max-width: 70%;
+        float: right;
+        margin-bottom: 10px;
+    }
+
+    .message {
+        color: #fff;
+        font-style: 8px;
+        word-wrap: break-word;
+    }
+
+    .recieve-message {
+        background-color: rgb(76, 76, 79);
+        border-radius: 30px 30px 30px 0px;
+        padding: 10px;
+        max-width: 70%;
+        float: left;
+        margin-bottom: 10px;
+    }
+
+    #chat-page {
+        min-height: 300px;
+        min-width: 250px;
+        background-color: #ced4da;
+        overflow: auto;
+        padding: 10px;
+        width: 100%;
+
+    }
+
+    .pro {
+        width: 100%;
+        overflow: auto;
+        height: auto;
+    }
+
+  
+</style>
+<div class="container-fluid">
+
+    
+
+    <div class="top-row px-4 w-100">
+        @if (!chatting)
+        {
+            <h2 class="card-title text-center ">Chat</h2>
+            <p class="">Enter your name to start chat man</p>
+            <div class="btn-group-sm border-secondary-1">
+                <input type="text" class="form-control-sm" maxlength="30" @bind="username"
+                    placeholder="enter your name.." />
+                <button class="btn btn-success" @onclick="Chat"><i class="bi bi-chat-heart-fill"></i><span
+                        class="oi oi-chat" aria-hidden="true"></span>Chat</button>
+            </div>
+
+
+            @if (message != null)
+            {
+                <div class="invalid-feedback">@message</div>
+                <small id="emailHelp" class="form-text text-muted">@message</small>
+            }
+        }
+    </div>
+
+    <div class=" container p-2 m-2 w-100">
+        @if (chatting)
+        {
+            <div class="d-flex bg-dark p-2 m-3">
+                <p class=" text-light me-5">You are Connnected <b class="text-success">@username</b></p>
+                <button class="btn btn-warning text-light" @onclick="DisconnectAsync">Disconnect</button>
+            </div>
+        }
+
+        @if (chatting)
+        {
+            <div class="border-2 rounded-2" id="chat-page">
+                @foreach (var item in messages)
+                {
+                    <div class="pro">
+                        <div class="send-message @item.CSS ">
+                            <div class="username">@item.Username</div>
+                            <div class="message">@item.Body</div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <hr />
+            <div class="btn-group-lg shadow-lg">
+                <input type="text" class="form-control-lg rounded-2 " placeholder="Type Comments"
+                    @bind="newmessage"></input>
+                <button class="btn btn-primary text-light" @onclick="SendMessageBTN">Send</button>
+            </div>
+        }
+    </div>
+
+</div>
+
+<script>
+     
+
+    function getRandomColor() {
+        const colors = ['rgb(254, 1, 224)', 'rgb(16, 237, 16)', 'blue', 'rgb(219, 247, 11)'];
+        const randomIndex = Math.floor(Math.random() * colors.length);
+        return colors[randomIndex];
+    }
+
+    function applyRandomColors() {
+        const grandparent = document.querySelectorAll('.pro');
+
+        grandparent.forEach(parent => {
+            const recievemessages = parent.querySelectorAll('.recieve-message');
+            recievemessages.forEach(message => {
+                const usernames = message.querySelectorAll('.username');
+                usernames.forEach(username => {
+                    username.style.color = getRandomColor();
+                });
+            });
+        });
+    };
+</script>
+
+
+
+@code {
+    private bool chatting { get; set; } = false;
+    private string? username { get; set; } = string.Empty;
+    private string? message { get; set; } = string.Empty;
+    private string? newmessage { get; set; } = string.Empty;
+    List<Message> messages = new List<Message>();
+    DataConnection.ChathubCon chatclient = null;
+
+    private async Task Chat()
+    {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            message = "Please enter a name";
+        }
+        else
+        {
+            try
+            {
+                messages.Clear();
+                chatclient = new DataConnection.ChathubCon(username, nm);
+                chatclient.MessageRecieved += MessageCRecieved;
+                await chatclient.StartChatMethod();
+                chatting = true;
+            }
+            catch (Exception ex)
+            {
+                message = $"ERROR: failed to start chat {ex.Message}";
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+            }
+        }
+    }
+
+    private void MessageCRecieved(object sender, DataConnection.MessageRecievedEventArgs e)
+    {
+        Console.WriteLine($"Blazor: recieve {e.Username} : {e.Message}");
+        bool ismine = false;
+        if (!string.IsNullOrWhiteSpace(e.Username))
+        {
+            ismine = string.Equals(e.Username, username, StringComparison.CurrentCultureIgnoreCase);
+        }
+        var newmsg = new Message(e.Username, e.Message, ismine);
+        messages.Add(newmsg);
+        InvokeAsync(StateHasChanged);
+        JSRuntime.InvokeVoidAsync("applyRandomColors");
+
+    }
+
+    async Task DisconnectAsync()
+    {
+        if (chatting)
+        {
+            await chatclient.StopAsync();
+            chatclient = null;
+            message = "Chat Ended";
+            chatting = false;
+        }
+    }
+
+    async Task SendMessageBTN()
+    {
+        if (chatting && !string.IsNullOrWhiteSpace(newmessage))
+        {
+            await chatclient.NewMessageTaker(newmessage);
+            newmessage = "";
+        }
+    }
+
+    class Message
+    {
+        public string Username { get; set; }
+        public string Body { get; set; }
+        public bool Mine { get; set; }
+        public string CSS { get { return Mine ? "send-message" : "recieve-message"; } }
+
+        public Message(string username, string body, bool mine)
+        {
+            Username = username;
+            Body = body;
+            Mine = mine;
+        }
+    }
+
+}

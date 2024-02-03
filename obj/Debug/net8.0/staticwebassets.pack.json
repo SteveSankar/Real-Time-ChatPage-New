@@ -1,0 +1,41 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Pen-Drive\\ChatPage-New\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\ChatPage-New.bundle.scp.css",
+      "PackagePath": "staticwebassets\\ChatPage-New.bundle.scp.css"
+    },
+    {
+      "Id": "C:\\Pen-Drive\\ChatPage-New\\wwwroot\\app.css",
+      "PackagePath": "staticwebassets\\app.css"
+    },
+    {
+      "Id": "C:\\Pen-Drive\\ChatPage-New\\wwwroot\\bootstrap\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css"
+    },
+    {
+      "Id": "C:\\Pen-Drive\\ChatPage-New\\wwwroot\\bootstrap\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "C:\\Pen-Drive\\ChatPage-New\\wwwroot\\favicon.png",
+      "PackagePath": "staticwebassets\\favicon.png"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.ChatPage-New.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.ChatPage-New.props",
+      "PackagePath": "build\\ChatPage-New.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.ChatPage-New.props",
+      "PackagePath": "buildMultiTargeting\\ChatPage-New.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.ChatPage-New.props",
+      "PackagePath": "buildTransitive\\ChatPage-New.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
